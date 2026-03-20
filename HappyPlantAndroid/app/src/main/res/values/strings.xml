@@ -1,0 +1,4 @@
+<resources>
+    <string name="app_name">HappyPlantAndroid</string>
+    <string name="error_dialog_title">Oh no! There was an error!</string>
+</resources>

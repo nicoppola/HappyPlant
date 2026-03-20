@@ -1,0 +1,341 @@
+/* ============================================
+   RESET & LAYOUT
+   ============================================ */
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+  transition: background 0.3s, color 0.3s;
+}
+
+.container {
+  max-width: 960px;
+  margin: 0 auto;
+  padding: 24px 16px;
+}
+
+/* ============================================
+   WEATHER THEME — LIGHT
+   ============================================ */
+
+:root {
+  --bg: #eef2f7;
+  --card-bg: rgba(255, 255, 255, 0.85);
+  --card-backdrop: blur(12px);
+  --text: #1a1a2e;
+  --text-muted: #6b7280;
+  --accent-bedroom: #6366f1;
+  --accent-office: #f59e0b;
+  --accent-diningroom: #10b981;
+  --border: rgba(255, 255, 255, 0.6);
+  --shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.12);
+  --radius: 16px;
+  --card-bedroom-bg: linear-gradient(135deg, #e0e7ff, #c7d2fe);
+  --card-office-bg: linear-gradient(135deg, #fef3c7, #fde68a);
+  --card-diningroom-bg: linear-gradient(135deg, #d1fae5, #a7f3d0);
+  --chart-grid: rgba(0, 0, 0, 0.04);
+  --chart-tick: #6b7280;
+  --btn-active-bg: #1a1a2e;
+  --btn-active-text: #ffffff;
+}
+
+/* ============================================
+   WEATHER THEME — DARK
+   ============================================ */
+
+.dark {
+  --bg: #0f172a;
+  --card-bg: rgba(30, 41, 59, 0.8);
+  --text: #e2e8f0;
+  --text-muted: #94a3b8;
+  --border: rgba(255, 255, 255, 0.08);
+  --shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+  --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.4);
+  --card-bedroom-bg: linear-gradient(135deg, #312e81, #3730a3);
+  --card-office-bg: linear-gradient(135deg, #78350f, #92400e);
+  --card-diningroom-bg: linear-gradient(135deg, #064e3b, #065f46);
+  --chart-grid: rgba(255, 255, 255, 0.06);
+  --chart-tick: #94a3b8;
+  --btn-active-bg: #e2e8f0;
+  --btn-active-text: #0f172a;
+}
+
+/* ============================================
+   HEADER
+   ============================================ */
+
+header {
+  text-align: center;
+  margin-bottom: 8px;
+}
+
+header h1 {
+  font-size: 1.75rem;
+  font-weight: 700;
+  margin-bottom: 4px;
+}
+
+header p {
+  color: var(--text-muted);
+  font-size: 0.9rem;
+}
+
+/* ============================================
+   TOOLBAR
+   ============================================ */
+
+.toolbar {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 28px;
+}
+
+.dark-toggle {
+  background: none;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 4px 8px;
+  font-size: 1rem;
+  cursor: pointer;
+  line-height: 1;
+  transition: border-color 0.15s;
+}
+
+.dark-toggle:hover {
+  border-color: var(--text-muted);
+}
+
+.demo-toggle {
+  display: flex;
+  align-items: center;
+}
+
+.toggle-label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  user-select: none;
+}
+
+.toggle-text {
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: var(--text-muted);
+}
+
+.toggle-switch {
+  position: relative;
+  width: 36px;
+  height: 20px;
+  border-radius: 10px;
+  border: 1px solid var(--border);
+  background: var(--border);
+  cursor: pointer;
+  padding: 0;
+  transition: background 0.2s, border-color 0.2s;
+}
+
+.toggle-switch.on {
+  background: var(--accent-bedroom);
+  border-color: var(--accent-bedroom);
+}
+
+.toggle-knob {
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: white;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.15);
+  transition: transform 0.2s;
+}
+
+.toggle-switch.on .toggle-knob {
+  transform: translateX(16px);
+}
+
+/* ============================================
+   CARDS GRID
+   ============================================ */
+
+.cards-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 16px;
+  margin-bottom: 32px;
+}
+
+.card {
+  background: var(--card-bg);
+  border-radius: var(--radius);
+  padding: 20px;
+  box-shadow: var(--shadow);
+  border: 1px solid var(--border);
+  transition: box-shadow 0.2s, background 0.3s, border-color 0.3s;
+  backdrop-filter: var(--card-backdrop);
+  -webkit-backdrop-filter: var(--card-backdrop);
+}
+
+.card:hover {
+  box-shadow: var(--shadow-lg);
+}
+
+.card[data-location="bedroom"] { background: var(--card-bedroom-bg); }
+.card[data-location="office"] { background: var(--card-office-bg); }
+.card[data-location="diningroom"] { background: var(--card-diningroom-bg); }
+
+.card-location {
+  font-size: 0.8rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: 12px;
+}
+
+.card-location.bedroom { color: var(--accent-bedroom); }
+.card-location.office { color: var(--accent-office); }
+.card-location.diningroom { color: var(--accent-diningroom); }
+
+.card-readings {
+  display: flex;
+  gap: 24px;
+}
+
+.reading {
+  display: flex;
+  flex-direction: column;
+}
+
+.reading-value {
+  font-size: 2rem;
+  font-weight: 700;
+  line-height: 1;
+}
+
+.reading-label {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  margin-top: 4px;
+}
+
+.card-timestamp {
+  font-size: 0.7rem;
+  color: var(--text-muted);
+  margin-top: 12px;
+}
+
+/* ============================================
+   CHART SECTION
+   ============================================ */
+
+.chart-section {
+  background: var(--card-bg);
+  border-radius: var(--radius);
+  padding: 24px;
+  box-shadow: var(--shadow);
+  border: 1px solid var(--border);
+  transition: background 0.3s, border-color 0.3s;
+  backdrop-filter: var(--card-backdrop);
+  -webkit-backdrop-filter: var(--card-backdrop);
+}
+
+.chart-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.chart-header h2 {
+  font-size: 1.1rem;
+  font-weight: 600;
+}
+
+.range-buttons {
+  display: flex;
+  gap: 4px;
+}
+
+.range-btn {
+  padding: 6px 12px;
+  border: 1px solid var(--border);
+  background: transparent;
+  border-radius: 6px;
+  font-size: 0.8rem;
+  cursor: pointer;
+  color: var(--text-muted);
+  transition: all 0.15s;
+}
+
+.range-btn:hover {
+  border-color: var(--text-muted);
+  color: var(--text);
+}
+
+.range-btn.active {
+  background: var(--btn-active-bg);
+  color: var(--btn-active-text);
+  border-color: var(--btn-active-bg);
+}
+
+/* Room tabs */
+.room-tabs {
+  display: flex;
+  gap: 4px;
+  margin-bottom: 16px;
+}
+
+.stacked-charts {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.chart-panel-label {
+  font-size: 0.7rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--text-muted);
+  margin-top: 8px;
+}
+
+/* ============================================
+   STATES
+   ============================================ */
+
+.loading {
+  text-align: center;
+  padding: 48px;
+  color: var(--text-muted);
+}
+
+.error {
+  text-align: center;
+  padding: 24px;
+  color: #ef4444;
+  background: #fef2f2;
+  border-radius: var(--radius);
+  margin-bottom: 16px;
+}
+
+.dark .error {
+  background: rgba(239, 68, 68, 0.1);
+  color: #fca5a5;
+}
