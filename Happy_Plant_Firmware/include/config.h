@@ -8,6 +8,4 @@ DisplaySize currSize = big;
 //#define DEVICE_ID "diningroom"
 #define DEVICE_ID "office"
 
-#define RASPBERRY_PI_IP "192.168.1.177"
-
 #endif

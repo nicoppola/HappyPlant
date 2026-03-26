@@ -2,19 +2,11 @@
 #define WIFI_CONTROLLER
 
 #include <ESP8266WiFi.h>
+#include <ESP8266HTTPClient.h>
+#include <ESP8266mDNS.h>
 
-#include <pb_common.h>
-#include <pb.h>
-#include <pb_encode.h>
-#include <pb_decode.h>
-#include "proto_bufs.pb.h"
 #include "config.h"
 #include "secrets.h"
-
-const char* host     = RASPBERRY_PI_IP;
-const short port  = 55555;
-
-WiFiClient client;
 
 class WifiController{
 
@@ -36,6 +28,7 @@ class WifiController{
       Serial.print("WiFi connected, ");
       Serial.print("IP address: ");
       Serial.println(WiFi.localIP());
+      MDNS.begin("happyplant");
     } else {
       Serial.println("WiFi connection failed, continuing without WiFi");
     }
@@ -45,27 +38,28 @@ class WifiController{
     return WiFi.status() == WL_CONNECTED;
   }
 
-  void sendTemp(pb_TempEvent e) {
+  bool sendReading(float temperature, float humidity, const char* location) {
+    WiFiClient wifiClient;
+    HTTPClient http;
 
-    if (!client.connect(host, port)) {
-      Serial.println("connection failed");
-      Serial.println("wait 5 sec to reconnect...");
-      delay(5000);
-      return;
-    }
+    http.begin(wifiClient, String(SERVER_URL) + "/api/readings");
+    http.addHeader("Content-Type", "application/json");
 
-    uint8_t buffer[pb_TempEvent_size];
-    pb_ostream_t stream = pb_ostream_from_buffer(buffer, sizeof(buffer));
-    
-    if (!pb_encode(&stream, pb_TempEvent_fields, &e)){
-      Serial.println("failed to encode temp proto");
-      Serial.println(PB_GET_ERROR(&stream));
-      return;
+    String body = "{\"location\":\"" + String(location) +
+                  "\",\"temperature\":" + String(temperature, 1) +
+                  ",\"humidity\":" + String(humidity, 1) + "}";
+
+    int code = http.POST(body);
+    http.end();
+
+    if(code == 204){
+      Serial.println("Reading sent successfully");
+      return true;
+    } else {
+      Serial.print("Failed to send reading, HTTP code: ");
+      Serial.println(code);
+      return false;
     }
-    
-    Serial.print("sending temp...");
-    Serial.println(e.tempFar);
-    client.write(buffer, stream.bytes_written);
   }
 };
 
