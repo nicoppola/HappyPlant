@@ -38,14 +38,17 @@ ok "System updated"
 # ============================================================
 info "Installing InfluxDB 2"
 
+# Clean up any leftover apt repo from a previous run
+rm -f /etc/apt/sources.list.d/influxdata.list /etc/apt/trusted.gpg.d/influxdata.gpg
+
 INFLUX_VERSION="2.7.11"
 
-if command -v influx &>/dev/null; then
+if command -v influxd &>/dev/null; then
     ok "InfluxDB already installed, skipping"
 else
-    INFLUX_DEB="influxdb2-${INFLUX_VERSION}-arm64.deb"
-    curl -sLO "https://download.influxdata.com/influxdb/releases/${INFLUX_DEB}"
-    dpkg -i "$INFLUX_DEB"
+    INFLUX_DEB="influxdb2_${INFLUX_VERSION}-1_arm64.deb"
+    curl -sLO "https://repos.influxdata.com/debian/pool/stable/i/influxdb2/${INFLUX_DEB}"
+    dpkg -i "$INFLUX_DEB" || apt install -f -y
     rm -f "$INFLUX_DEB"
     ok "InfluxDB $INFLUX_VERSION installed"
 fi
