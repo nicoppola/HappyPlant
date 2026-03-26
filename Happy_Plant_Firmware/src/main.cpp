@@ -25,6 +25,9 @@ WifiController wifi;
 Point point(MEASUREMENT);
 
 #define ledPin 16
+#define WIFI_RETRY_INTERVAL 20000
+
+unsigned long lastWifiAttempt = 0;
 
 void verifyInfluxDb() {
 
@@ -64,7 +67,9 @@ void setup() {
   sensor.begin();
   oled->initOled();
   wifi.initWifi();
-  verifyInfluxDb();
+  if(wifi.isConnected()){
+    verifyInfluxDb();
+  }
 }
 
 void loop() {
@@ -77,22 +82,27 @@ void loop() {
   float temperature = sensor.readTemperature();
 
   float temperatureFarenheit = ToFahrenheit(temperature);
-  
-  oled->displayData(temperatureFarenheit, humidity);
+  bool connected = wifi.isConnected();
 
-  point.addField("humidity", humidity);
-  point.addField("temperature", temperatureFarenheit);
+  oled->displayData(temperatureFarenheit, humidity, connected);
 
-  Serial.println(influxClient.pointToLineProtocol(point));
+  if(connected){
+    point.addField("humidity", humidity);
+    point.addField("temperature", temperatureFarenheit);
 
-  if(!influxClient.writePoint(point)){
-    Serial.print("InfluxDB write failed: ");
-    Serial.println(influxClient.getLastErrorMessage());
-  }
+    Serial.println(influxClient.pointToLineProtocol(point));
 
-  if(!wifi.isConnected()){
-    Serial.println("Lost Wifi Connection... Reconnecting...");
-    wifi.initWifi();
+    if(!influxClient.writePoint(point)){
+      Serial.print("InfluxDB write failed: ");
+      Serial.println(influxClient.getLastErrorMessage());
+    }
+  } else {
+    Serial.println("No WiFi - skipping InfluxDB write");
+    if(millis() - lastWifiAttempt >= WIFI_RETRY_INTERVAL){
+      Serial.println("Retrying WiFi...");
+      lastWifiAttempt = millis();
+      wifi.initWifi();
+    }
   }
 
   delay(5000);

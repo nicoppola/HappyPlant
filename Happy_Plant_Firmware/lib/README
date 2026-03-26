@@ -1,46 +1,28 @@
+HappyPlant Firmware
+===================
 
-This directory is intended for project specific (private) libraries.
-PlatformIO will compile them to static libraries and link into executable file.
+ESP8266 (NodeMCU v2) environmental monitor that reads temperature and humidity
+from an HTU21D sensor, displays readings on an OLED, and logs data to InfluxDB.
 
-The source code of each library should be placed in a an own separate directory
-("lib/your_library_name/[here are source files]").
+Setup
+-----
 
-For example, see a structure of the following two libraries `Foo` and `Bar`:
+1. Create a secrets file at `include/secrets.h` with your WiFi credentials:
 
-|--lib
-|  |
-|  |--Bar
-|  |  |--docs
-|  |  |--examples
-|  |  |--src
-|  |     |- Bar.c
-|  |     |- Bar.h
-|  |  |- library.json (optional, custom build options, etc) https://docs.platformio.org/page/librarymanager/config.html
-|  |
-|  |--Foo
-|  |  |- Foo.c
-|  |  |- Foo.h
-|  |
-|  |- README --> THIS FILE
-|
-|- platformio.ini
-|--src
-   |- main.c
+   #ifndef SECRETS_H
+   #define SECRETS_H
 
-and a contents of `src/main.c`:
-```
-#include <Foo.h>
-#include <Bar.h>
+   const char* ssid     = "YOUR_WIFI_SSID";
+   const char* password = "YOUR_WIFI_PASSWORD";
 
-int main (void)
-{
-  ...
-}
+   #endif
 
-```
+   This file is gitignored and will not be committed.
 
-PlatformIO Library Dependency Finder will find automatically dependent
-libraries scanning project source files.
+2. Update `include/config.h` to set your display size, device ID, and server IP.
 
-More information about PlatformIO Library Dependency Finder
-- https://docs.platformio.org/page/librarymanager/ldf.html
+3. Update `include/influxDbConfig.h` with your InfluxDB URL and token.
+
+4. Flash with PlatformIO:
+
+   pio run --target upload

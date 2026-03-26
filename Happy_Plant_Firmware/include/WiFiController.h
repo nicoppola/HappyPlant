@@ -9,9 +9,8 @@
 #include <pb_decode.h>
 #include "proto_bufs.pb.h"
 #include "config.h"
+#include "secrets.h"
 
-const char* ssid     = "YOUR_SSID";
-const char* password = "YOUR_PASSWORD";
 const char* host     = RASPBERRY_PI_IP;
 const short port  = 55555;
 
@@ -24,16 +23,22 @@ class WifiController{
     Serial.println("Begin Wifi...");
     WiFi.mode(WIFI_STA);
     WiFi.begin(ssid, password);
-  
-    while (WiFi.status() != WL_CONNECTED) {
-      Serial.println("WIFI connection failed, reconnecting...");
-      delay(5000);
+
+    int attempts = 0;
+    while (WiFi.status() != WL_CONNECTED && attempts < 20) {
+      Serial.println("WIFI connecting...");
+      delay(500);
+      attempts++;
     }
 
-    Serial.println("");
-    Serial.print("WiFi connected, ");
-    Serial.print("IP address: ");
-    Serial.println(WiFi.localIP());
+    if(WiFi.status() == WL_CONNECTED){
+      Serial.println("");
+      Serial.print("WiFi connected, ");
+      Serial.print("IP address: ");
+      Serial.println(WiFi.localIP());
+    } else {
+      Serial.println("WiFi connection failed, continuing without WiFi");
+    }
   }
 
   boolean isConnected(){
