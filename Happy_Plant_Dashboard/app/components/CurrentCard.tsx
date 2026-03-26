@@ -31,7 +31,7 @@ export default function CurrentCard({
       <div className="card-readings">
         <div className="reading">
           <span className="reading-value">
-            {temperature !== null ? `${temperature}\u00B0` : "--"}
+            {temperature !== null ? `${temperature}°F` : "--"}
           </span>
           <span className="reading-label">Temperature</span>
         </div>

@@ -132,8 +132,8 @@ export default function RoomTabsChart({ data, range, chartKey, selectedRoom, onS
           range={range}
           chartKey={chartKey}
           field="temperature"
-          label="Temp (\u00B0F)"
-          suffix="\u00B0"
+          label="Temp (°F)"
+          suffix="°F"
           locations={locations}
           showLegend={locations.length > 1}
         />

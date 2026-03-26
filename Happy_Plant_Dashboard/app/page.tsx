@@ -10,8 +10,8 @@ export default function Home() {
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
-    const savedDark = localStorage.getItem("hp-dark") === "true";
-    setDark(savedDark);
+    const saved = localStorage.getItem("hp-dark");
+    setDark(saved === null ? true : saved === "true");
     setMounted(true);
   }, []);
 
