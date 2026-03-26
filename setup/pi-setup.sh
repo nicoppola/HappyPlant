@@ -38,14 +38,16 @@ ok "System updated"
 # ============================================================
 info "Installing InfluxDB 2"
 
+INFLUX_VERSION="2.7.11"
+
 if command -v influx &>/dev/null; then
     ok "InfluxDB already installed, skipping"
 else
-    curl -sL https://repos.influxdata.com/influxdata-archive_compat.key | gpg --dearmor -o /etc/apt/trusted.gpg.d/influxdata.gpg
-    echo "deb [signed-by=/etc/apt/trusted.gpg.d/influxdata.gpg] https://repos.influxdata.com/debian stable main" > /etc/apt/sources.list.d/influxdata.list
-    apt update
-    apt install -y influxdb2
-    ok "InfluxDB installed"
+    INFLUX_DEB="influxdb2-${INFLUX_VERSION}-arm64.deb"
+    curl -sLO "https://download.influxdata.com/influxdb/releases/${INFLUX_DEB}"
+    dpkg -i "$INFLUX_DEB"
+    rm -f "$INFLUX_DEB"
+    ok "InfluxDB $INFLUX_VERSION installed"
 fi
 
 systemctl enable --now influxdb
