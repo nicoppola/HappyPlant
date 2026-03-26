@@ -21,6 +21,7 @@ npm install --silent
 npm run build --silent
 
 echo "Deploying..."
+systemctl stop happyplant
 cp "$REPO_DIR/Happy_Plant_Server/happyplant-server" "$INSTALL_DIR/"
 cp -r "$REPO_DIR/Happy_Plant_Dashboard/out/." "$INSTALL_DIR/static/"
 chown -R happyplant:happyplant "$INSTALL_DIR"
