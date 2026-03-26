@@ -42,28 +42,48 @@ ok "System updated"
 info "Installing InfluxDB 2"
 
 INFLUX_VERSION="2.7.11"
+INFLUX_CLI_VERSION="2.7.5"
 
 if command -v influxd &>/dev/null; then
-    ok "InfluxDB already installed, skipping"
+    ok "InfluxDB server already installed, skipping"
 else
     INFLUX_DEB="influxdb2-${INFLUX_VERSION}_linux_arm64.deb"
     curl -sfLO "https://dl.influxdata.com/influxdb/releases/${INFLUX_DEB}"
-    [[ -s "$INFLUX_DEB" ]] || fail "Failed to download InfluxDB .deb"
+    [[ -s "$INFLUX_DEB" ]] || fail "Failed to download InfluxDB server .deb"
     dpkg -i "$INFLUX_DEB" || apt install -f -y
     rm -f "$INFLUX_DEB"
-    ok "InfluxDB $INFLUX_VERSION installed"
+    ok "InfluxDB server $INFLUX_VERSION installed"
+fi
+
+if command -v influx &>/dev/null; then
+    ok "InfluxDB CLI already installed, skipping"
+else
+    INFLUX_CLI_TAR="influxdb2-client-${INFLUX_CLI_VERSION}-linux-arm64.tar.gz"
+    curl -sfLO "https://dl.influxdata.com/influxdb/releases/${INFLUX_CLI_TAR}"
+    [[ -s "$INFLUX_CLI_TAR" ]] || fail "Failed to download InfluxDB CLI"
+    tar -xzf "$INFLUX_CLI_TAR"
+    mv influx /usr/local/bin/
+    rm -f "$INFLUX_CLI_TAR"
+    ok "InfluxDB CLI $INFLUX_CLI_VERSION installed"
 fi
 
 systemctl enable --now influxdb2
 ok "InfluxDB service enabled"
 
 # Wait for InfluxDB to be ready
-sleep 2
+for i in $(seq 1 10); do
+    curl -sf http://localhost:8086/health &>/dev/null && break
+    sleep 1
+done
+curl -sf http://localhost:8086/health &>/dev/null || fail "InfluxDB did not start"
+ok "InfluxDB is healthy"
 
-# Initial setup (skip if already configured)
-if influx bucket list --org Home &>/dev/null 2>&1; then
+# Initial setup — use the HTTP API to check if already set up
+SETUP_CHECK=$(curl -sf http://localhost:8086/api/v2/setup || echo '{}')
+ALREADY_SETUP=$(echo "$SETUP_CHECK" | grep -o '"allowed":false' || true)
+
+if [[ -n "$ALREADY_SETUP" ]]; then
     ok "InfluxDB already configured, skipping setup"
-    # Try to get existing token
     INFLUX_TOKEN=$(influx auth list --json 2>/dev/null | grep -o '"token":"[^"]*"' | head -1 | cut -d'"' -f4 || echo "")
     if [[ -z "$INFLUX_TOKEN" ]]; then
         echo "  Could not auto-detect existing token."
@@ -80,21 +100,24 @@ else
     [[ "$INFLUX_PASSWORD" == "$INFLUX_PASSWORD_CONFIRM" ]] || fail "Passwords do not match"
     [[ ${#INFLUX_PASSWORD} -ge 8 ]] || fail "Password must be at least 8 characters"
 
-    SETUP_OUTPUT=$(influx setup \
-        --username happyplant \
-        --password "$INFLUX_PASSWORD" \
-        --org Home \
-        --bucket happyplant \
-        --retention 0 \
-        --force 2>&1)
+    # Use the HTTP API for initial setup
+    SETUP_RESPONSE=$(curl -sf -X POST http://localhost:8086/api/v2/setup \
+        -H "Content-Type: application/json" \
+        -d "{
+            \"username\": \"happyplant\",
+            \"password\": \"$INFLUX_PASSWORD\",
+            \"org\": \"Home\",
+            \"bucket\": \"happyplant\",
+            \"retentionPeriodSeconds\": 0
+        }") || fail "InfluxDB setup API call failed"
 
     ok "InfluxDB configured (user: happyplant, org: Home, bucket: happyplant)"
 
-    # Extract the operator token
-    INFLUX_TOKEN=$(influx auth list --json 2>/dev/null | grep -o '"token":"[^"]*"' | head -1 | cut -d'"' -f4 || echo "")
+    # Extract token from the setup response
+    INFLUX_TOKEN=$(echo "$SETUP_RESPONSE" | grep -o '"token":"[^"]*"' | head -1 | cut -d'"' -f4 || echo "")
 
     if [[ -z "$INFLUX_TOKEN" ]]; then
-        echo "  Could not auto-detect token from setup output."
+        echo "  Could not extract token from setup response."
         echo "  Run 'influx auth list' to find it, then update $ENV_FILE"
         INFLUX_TOKEN="REPLACE_ME"
     fi
