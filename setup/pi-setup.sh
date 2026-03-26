@@ -67,7 +67,7 @@ else
     ok "InfluxDB CLI $INFLUX_CLI_VERSION installed"
 fi
 
-systemctl enable --now influxdb2
+systemctl enable --now influxdb
 ok "InfluxDB service enabled"
 
 # Wait for InfluxDB to be ready
