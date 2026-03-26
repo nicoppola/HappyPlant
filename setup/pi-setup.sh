@@ -47,7 +47,7 @@ INFLUX_CLI_VERSION="2.7.5"
 if command -v influxd &>/dev/null; then
     ok "InfluxDB server already installed, skipping"
 else
-    INFLUX_DEB="influxdb2-${INFLUX_VERSION}_linux_arm64.deb"
+    INFLUX_DEB="influxdb2_${INFLUX_VERSION}-1_arm64.deb"
     curl -sfLO "https://dl.influxdata.com/influxdb/releases/${INFLUX_DEB}"
     [[ -s "$INFLUX_DEB" ]] || fail "Failed to download InfluxDB server .deb"
     dpkg -i "$INFLUX_DEB" || apt install -f -y
