@@ -29,6 +29,9 @@ REPO_DIR="$(dirname "$SCRIPT_DIR")"
 # ============================================================
 # 1. System updates
 # ============================================================
+# Clean up any leftover InfluxData apt repo from a previous run
+rm -f /etc/apt/sources.list.d/influxdata.list /etc/apt/trusted.gpg.d/influxdata.gpg
+
 info "Updating system packages"
 apt update && apt upgrade -y
 ok "System updated"
@@ -38,22 +41,20 @@ ok "System updated"
 # ============================================================
 info "Installing InfluxDB 2"
 
-# Clean up any leftover apt repo from a previous run
-rm -f /etc/apt/sources.list.d/influxdata.list /etc/apt/trusted.gpg.d/influxdata.gpg
-
 INFLUX_VERSION="2.7.11"
 
 if command -v influxd &>/dev/null; then
     ok "InfluxDB already installed, skipping"
 else
-    INFLUX_DEB="influxdb2_${INFLUX_VERSION}-1_arm64.deb"
-    curl -sLO "https://repos.influxdata.com/debian/pool/stable/i/influxdb2/${INFLUX_DEB}"
+    INFLUX_DEB="influxdb2-${INFLUX_VERSION}_linux_arm64.deb"
+    curl -sfLO "https://dl.influxdata.com/influxdb/releases/${INFLUX_DEB}"
+    [[ -s "$INFLUX_DEB" ]] || fail "Failed to download InfluxDB .deb"
     dpkg -i "$INFLUX_DEB" || apt install -f -y
     rm -f "$INFLUX_DEB"
     ok "InfluxDB $INFLUX_VERSION installed"
 fi
 
-systemctl enable --now influxdb
+systemctl enable --now influxdb2
 ok "InfluxDB service enabled"
 
 # Wait for InfluxDB to be ready
