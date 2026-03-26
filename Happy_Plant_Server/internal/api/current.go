@@ -15,6 +15,12 @@ func CurrentHandler(db *influx.Client) http.HandlerFunc {
 			return
 		}
 
+		if r.URL.Query().Get("demo") == "true" {
+			w.Header().Set("Content-Type", "application/json")
+			json.NewEncoder(w).Encode(getDemoCurrentReadings())
+			return
+		}
+
 		readings, err := db.QueryCurrent(r.Context())
 		if err != nil {
 			log.Printf("current query failed: %v", err)

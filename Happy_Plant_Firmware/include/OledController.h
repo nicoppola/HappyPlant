@@ -87,9 +87,18 @@ public:
     }
 
     void drawWifiIcon(int cx, int cy, bool slash){
-        display.drawCircle(cx, cy, 7, SSD1306_WHITE);
-        display.drawCircle(cx, cy, 4, SSD1306_WHITE);
-        display.fillRect(cx - 8, cy + 1, 17, 8, SSD1306_BLACK);
+        for(int a = -45; a <= 45; a += 3){
+            float rad = a * 3.14159f / 180.0f;
+            int px = cx + (int)(8 * sinf(rad));
+            int py = cy - (int)(8 * cosf(rad));
+            display.drawPixel(px, py, SSD1306_WHITE);
+        }
+        for(int a = -45; a <= 45; a += 4){
+            float rad = a * 3.14159f / 180.0f;
+            int px = cx + (int)(5 * sinf(rad));
+            int py = cy - (int)(5 * cosf(rad));
+            display.drawPixel(px, py, SSD1306_WHITE);
+        }
         display.fillCircle(cx, cy, 1, SSD1306_WHITE);
         if(slash){
             display.drawLine(cx - 5, cy - 8, cx + 5, cy + 2, SSD1306_WHITE);
@@ -102,9 +111,9 @@ public:
 
         display.setTextSize(2);
         display.setTextColor(SSD1306_WHITE);
-        display.setCursor(25,0);
+        display.setCursor(15,0);
         display.printf("%0.2f F\n", tmp);
-        display.setCursor(25,18);
+        display.setCursor(15,18);
         display.printf("%0.2f %%\n", humidity);
 
         drawWifiIcon(120, 9, !wifiConnected);

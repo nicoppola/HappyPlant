@@ -27,6 +27,12 @@ func HistoryHandler(db *influx.Client) http.HandlerFunc {
 			rangeKey = "24h"
 		}
 
+		if r.URL.Query().Get("demo") == "true" {
+			w.Header().Set("Content-Type", "application/json")
+			json.NewEncoder(w).Encode(getDemoHistory(rangeKey))
+			return
+		}
+
 		cfg, ok := validRanges[rangeKey]
 		if !ok {
 			http.Error(w, "invalid range; use 1h, 24h, 7d, or 30d", http.StatusBadRequest)
